@@ -31,9 +31,6 @@ Woodpecker aims to be the most robust data ingestion bridge for AI systems. We s
 - **Context Preservation:** Configurable chunk overlapping (e.g., 20%) to ensure concepts flow naturally across vector boundaries.
 - **Seamless Integration:** Designed to easily plug into larger e-commerce or advisory AI architectures.
 
-## 🌐 Live Demo
-Try out our semantic chunking algorithm and visualize how documents are split in real-time: [Woodpecker Live Demo](#)
-
 ## 📸 Screenshots
 
 <div align="center">
