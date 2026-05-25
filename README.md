@@ -15,7 +15,7 @@
 
 </div>
 
-## ⚡ Overview
+## What Is Woodpecker?
 
 **Woodpecker** is a specialized semantic document chunking engine designed for Retrieval-Augmented Generation (RAG) pipelines. Just like a woodpecker precisely extracting what it needs from a massive tree, this tool intelligently parses, splits, and overlaps complex documents (PDFs, DOCX, Markdown) to extract highly relevant, context-preserving text chunks. 
 
@@ -31,7 +31,17 @@ Woodpecker aims to be the most robust data ingestion bridge for AI systems. We s
 - **Context Preservation:** Configurable chunk overlapping (e.g., 20%) to ensure concepts flow naturally across vector boundaries.
 - **Seamless Integration:** Designed to easily plug into larger e-commerce or advisory AI architectures.
 
-## 📸 Screenshots
+## Basic Usage Demo
+
+<div align="center">
+<table>
+<tr>
+<td><img src="./static/image/demo/chunking_demo1.png" alt="Before: Raw Document [Trống - Cần cập nhật]" width="100%"/></td>
+</tr>
+</table>
+</div>
+
+## Screenshots
 
 <div align="center">
 <table>
@@ -42,7 +52,7 @@ Woodpecker aims to be the most robust data ingestion bridge for AI systems. We s
 </table>
 </div>
 
-## 🔄 Workflow
+## Workflow
 
 1. **Document Ingestion**: Read raw files (PDF/DOCX) and utilize parsers to output clean Markdown.
 2. **Text Processing**: Clean up special characters, normalize punctuation, and handle tokenization.
@@ -52,7 +62,7 @@ Woodpecker aims to be the most robust data ingestion bridge for AI systems. We s
 4. **Chunk Overlap**: Stitch the end of `Chunk A` with the beginning of `Chunk B` to preserve narrative flow.
 5. **Vector Ready**: Output perfectly sized JSON/Text objects ready for your embedding model.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -95,7 +105,7 @@ chunks = chunker.process_file("data/eco_lifestyle_guide.md")
 print(f"Extracted {len(chunks)} semantic chunks successfully!")
 ```
 
-## 📬 Join the Conversation
+## Join the Conversation
 
 If you're interested in AI, RAG optimization, or want to contribute to the project, feel free to reach out!
 
@@ -103,7 +113,7 @@ Email: vonhuthao.dev@gmail.com
 
 GitHub: @vonhut-hao
 
-## 📈 Project Statistics
+## Project Statistics
 
 <a href="https://www.star-history.com/?repos=vonhut-hao%2Fwoodpecker&type=date&legend=top-left">
  <picture>
