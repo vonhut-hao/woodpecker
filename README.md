@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="20%" height="20%" alt="WOODPECKER-w" src="https://github.com/user-attachments/assets/3e0ed2d4-1985-4a62-b4d2-ed3996238237" />
+<img width="20%" height="20%" alt="WOODPECKER-w" src="https://github.com/user-attachments/assets/4ea4fd34-1cf6-48b8-9e3c-d158219356f5" />
 
 **Động cơ phân mảnh tài liệu theo ngữ nghĩa, khai phá mọi tài liệu cho RAG**
 </br>
@@ -52,6 +52,14 @@ Woodpecker aims to be the most robust data ingestion bridge for AI systems. We s
 </table>
 </div>
 
+## System Architecture
+
+Below is the C4 Container diagram illustrating how Woodpecker fits into the broader data ingestion pipeline, acting as the bridge between raw document parsers (like MinerU) and downstream databases (Vector DBs and Graph DBs).
+
+<div align="center">
+<img width="1692" height="521" alt="woodpeckerC4Diagram-line" src="https://github.com/user-attachments/assets/ddff4da8-c5ab-49e7-9646-48eef74ff254" />
+</div>
+
 ## Workflow
 
 1. **Document Ingestion**: Read raw files (PDF/DOCX) and utilize parsers to output clean Markdown.
@@ -93,7 +101,7 @@ pip install -r requirements.txt
 
 ### 3. Usage Example
 
-```bash
+```python
 from woodpecker import SemanticChunker
 
 # Initialize the chunker with a 20% overlap strategy
