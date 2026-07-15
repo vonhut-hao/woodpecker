@@ -146,5 +146,5 @@ uv run pytest tests/ -v
 
 If you're interested in AI, RAG optimization, or want to contribute to the project, feel free to reach out!
 
-- Email: vonhuthao.dev@gmail.com
+- Email: haovonhut.vn@gmail.com
 - GitHub: [@vonhut-hao](https://github.com/vonhut-hao)
