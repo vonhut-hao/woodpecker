@@ -19,8 +19,14 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.environ.get("OPENROUTER_API_KEY", "NOT_SET"),
 )
-# Chọn model miễn phí ít bị nghẽn mạng hơn trên OpenRouter
-LLM_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
+# Danh sách các model miễn phí dự phòng trên OpenRouter (để đổi sang model khác nếu nghẽn)
+FREE_MODELS = [
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "google/gemma-2-9b-it:free",
+    "qwen/qwen-2-7b-instruct:free",
+    "microsoft/phi-3-mini-128k-instruct:free",
+    "mistralai/mistral-7b-instruct:free"
+]
 
 # --- 1. NAIVE CHUNKER ---
 def naive_chunking(text: str, max_tokens: int = MAX_TOKENS) -> list[str]:
@@ -64,21 +70,21 @@ Chỉ thị:
 
 Trả lời:"""
 
-    max_retries = 3
-    for attempt in range(max_retries):
+    # Thử lần lượt các mô hình khác nhau thay vì chỉ đợi 1 mô hình
+    for model_id in FREE_MODELS:
         try:
             response = client.chat.completions.create(
-                model=LLM_MODEL,
+                model=model_id,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            if attempt < max_retries - 1:
-                print(f"[Nghẽn mạng OpenRouter - Đang thử lại lần {attempt + 1}/3...]", end=" ", flush=True)
-                time.sleep(3)
-            else:
-                return f"[LỖI GỌI LLM SAU {max_retries} LẦN THỬ]: {str(e)}"
+            err_msg = str(e)
+            # Bỏ qua để thử model khác nếu gặp lỗi rate limit hoặc 404
+            continue
+            
+    return "[LỖI]: Đã thử tất cả các model miễn phí nhưng hệ thống OpenRouter đang quá tải toàn bộ!"
 
 # --- 4. MAIN INTERACTIVE CLI ---
 def main():
