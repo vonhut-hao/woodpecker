@@ -1,0 +1,8 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+data/
+output*.json
+docs/*
+!docs/woodpecker_system_spec.md
