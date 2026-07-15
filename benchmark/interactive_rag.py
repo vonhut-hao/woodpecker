@@ -139,8 +139,9 @@ def main():
             
             # --- KIỂM THỬ NAIVE ---
             print(">>> 1. KẾT QUẢ TỪ NAIVE CHUNKER (Cắt mù quáng 200 tokens) <<<")
-            naive_context = search(query, naive_chunks, model, top_k=1)[0]
-            print(f"[Context nạp vào LLM]: {naive_context}...")
+            naive_results = search(query, naive_chunks, model, top_k=3)
+            naive_context = "\n---\n".join(naive_results)
+            print(f"[Context nạp vào LLM]: {naive_results[0][:150]}... (và 2 đoạn khác)")
             print(f"[LLM Trả lời]: ", end="", flush=True)
             ans_naive = generate_answer(query, naive_context)
             print(f"\033[91m{ans_naive}\033[0m") # In màu đỏ
@@ -149,8 +150,9 @@ def main():
             
             # --- KIỂM THỬ WOODPECKER ---
             print(">>> 2. KẾT QUẢ TỪ WOODPECKER (Semantic + Overlap) <<<")
-            wp_context = search(query, woodpecker_chunks, model, top_k=1)[0]
-            print(f"[Context nạp vào LLM]: {wp_context}...")
+            wp_results = search(query, woodpecker_chunks, model, top_k=3)
+            wp_context = "\n---\n".join(wp_results)
+            print(f"[Context nạp vào LLM]: {wp_results[0][:150]}... (và 2 đoạn khác)")
             print(f"[LLM Trả lời]: ", end="", flush=True)
             ans_wp = generate_answer(query, wp_context)
             print(f"\033[92m{ans_wp}\033[0m") # In màu xanh lá
