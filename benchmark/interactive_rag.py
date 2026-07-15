@@ -19,14 +19,21 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.environ.get("OPENROUTER_API_KEY", "NOT_SET"),
 )
-# Danh sách các model miễn phí dự phòng trên OpenRouter (để đổi sang model khác nếu nghẽn)
-FREE_MODELS = [
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "google/gemma-2-9b-it:free",
-    "qwen/qwen-2-7b-instruct:free",
-    "microsoft/phi-3-mini-128k-instruct:free",
-    "mistralai/mistral-7b-instruct:free"
-]
+import urllib.request
+
+def get_free_models():
+    """Lấy danh sách TẤT CẢ các model đang được miễn phí ngay lúc này trên OpenRouter."""
+    try:
+        req = urllib.request.Request('https://openrouter.ai/api/v1/models')
+        with urllib.request.urlopen(req, timeout=5) as response:
+            models = json.loads(response.read().decode())['data']
+            # Lọc các model có chữ ":free" ở đuôi
+            return [m['id'] for m in models if m['id'].endswith(':free')]
+    except Exception as e:
+        print(f"[Cảnh báo]: Không thể tự động lấy danh sách model, dùng danh sách tĩnh.")
+        return ["meta-llama/llama-3.3-70b-instruct:free", "meta-llama/llama-3.2-3b-instruct:free", "nousresearch/hermes-3-llama-3.1-405b:free"]
+
+FREE_MODELS = get_free_models()
 
 # --- 1. NAIVE CHUNKER ---
 def naive_chunking(text: str, max_tokens: int = MAX_TOKENS) -> list[str]:
