@@ -62,22 +62,20 @@ def search(query: str, chunks: list[str], model: SentenceTransformer, top_k: int
 import time
 
 def generate_answer(query: str, retrieved_context: str) -> str:
-    prompt = f"""Bạn là một chuyên viên tư vấn học vụ của Trường Đại học Cần Thơ.
-Hãy trả lời câu hỏi sau của sinh viên dựa TỐI ĐA vào tài liệu được cung cấp.
+    prompt = f"""Bạn là chuyên viên tư vấn. Hãy trả lời câu hỏi sau dựa trên đoạn trích tài liệu.
 
-Tài liệu:
+Đoạn trích tài liệu:
 {retrieved_context}
 
 Câu hỏi: {query}
 
 Chỉ thị:
-- Chỉ trả lời dựa trên tài liệu cung cấp.
-- Trả lời ngắn gọn, đúng trọng tâm.
-- Nếu tài liệu bị thiếu chữ, cụt lủn, hoặc không có thông tin, hãy thành thật trả lời: "Tài liệu không cung cấp đủ thông tin."
+- Tìm và tóm tắt câu trả lời có trong đoạn trích.
+- Nếu đoạn trích bị đứt gãy không rõ nghĩa, hãy nói "Tài liệu bị đứt đoạn, không thể trả lời chắc chắn."
+- Nếu hoàn toàn không có thông tin, hãy nói "Không có thông tin."
 
 Trả lời:"""
 
-    # Thử lần lượt các mô hình khác nhau thay vì chỉ đợi 1 mô hình
     errors = []
     for model_id in FREE_MODELS:
         try:
@@ -86,7 +84,8 @@ Trả lời:"""
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0
             )
-            return response.choices[0].message.content.strip()
+            ans = response.choices[0].message.content.strip()
+            return f"\n(Nguồn: {model_id})\n{ans}"
         except Exception as e:
             err_msg = str(e)
             errors.append(f"{model_id}: {err_msg}")
