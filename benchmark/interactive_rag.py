@@ -108,9 +108,9 @@ def main():
         print("2. Copy file .env.example thành .env và điền key vào.")
         return
 
-    print("\n[1/3] Đang tải mô hình Embedding (paraphrase-multilingual-MiniLM-L12-v2)...")
-    # Thay thế mô hình tiếng Anh bằng mô hình đa ngôn ngữ để hiểu Semantic tiếng Việt ("đuổi học" = "thôi học")
-    model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+    print("\n[1/3] Đang tải mô hình Embedding (BAAI/bge-m3)...")
+    # Sử dụng BGE-M3 (State of the Art cho Multilingual RAG) để bắt ngữ nghĩa Tiếng Việt tốt nhất
+    model = SentenceTransformer("BAAI/bge-m3")
     
     print("[2/3] Đang chuẩn bị dữ liệu & Chunking...")
     input_path = r"C:\Users\HAVO\Downloads\Marker_Chunks\QD3266_QD_cong_tac_hoc_vu_danh_cho_SV_trinh_do_dai_hoc_hinh_thuc_chinh_quy_V3\QD3266_QD_cong_tac_hoc_vu_danh_cho_SV_trinh_do_dai_hoc_hinh_thuc_chinh_quy_V3.json"
