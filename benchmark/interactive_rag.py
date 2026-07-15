@@ -19,8 +19,8 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.environ.get("OPENROUTER_API_KEY", "NOT_SET"),
 )
-# Chọn model miễn phí (hoặc đổi sang 'google/gemini-2.0-flash-exp:free' / 'meta-llama/llama-3.3-70b-instruct:free' nếu cần)
-LLM_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+# Chọn model miễn phí ít bị nghẽn mạng hơn trên OpenRouter
+LLM_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
 
 # --- 1. NAIVE CHUNKER ---
 def naive_chunking(text: str, max_tokens: int = MAX_TOKENS) -> list[str]:
@@ -46,6 +46,8 @@ def search(query: str, chunks: list[str], model: SentenceTransformer, top_k: int
     return [text for score, text in results[:top_k]]
 
 # --- 3. GỌI LLM TẠO CÂU TRẢ LỜI (GENERATION) ---
+import time
+
 def generate_answer(query: str, retrieved_context: str) -> str:
     prompt = f"""Bạn là một chuyên viên tư vấn học vụ của Trường Đại học Cần Thơ.
 Hãy trả lời câu hỏi sau của sinh viên dựa TỐI ĐA vào tài liệu được cung cấp.
@@ -62,15 +64,21 @@ Chỉ thị:
 
 Trả lời:"""
 
-    try:
-        response = client.chat.completions.create(
-            model=LLM_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        return f"[LỖI GỌI LLM]: {str(e)}"
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model=LLM_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"[Nghẽn mạng OpenRouter - Đang thử lại lần {attempt + 1}/3...]", end=" ", flush=True)
+                time.sleep(3)
+            else:
+                return f"[LỖI GỌI LLM SAU {max_retries} LẦN THỬ]: {str(e)}"
 
 # --- 4. MAIN INTERACTIVE CLI ---
 def main():
