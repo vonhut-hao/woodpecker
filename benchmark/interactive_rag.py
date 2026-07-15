@@ -71,6 +71,7 @@ Chỉ thị:
 Trả lời:"""
 
     # Thử lần lượt các mô hình khác nhau thay vì chỉ đợi 1 mô hình
+    errors = []
     for model_id in FREE_MODELS:
         try:
             response = client.chat.completions.create(
@@ -81,10 +82,13 @@ Trả lời:"""
             return response.choices[0].message.content.strip()
         except Exception as e:
             err_msg = str(e)
-            # Bỏ qua để thử model khác nếu gặp lỗi rate limit hoặc 404
+            errors.append(f"{model_id}: {err_msg}")
+            # Nếu lỗi là do Authentication (401), dừng lập tức vì các model khác cũng sẽ lỗi
+            if "401" in err_msg or "403" in err_msg:
+                return f"[LỖI XÁC THỰC API KEY]: Khóa API của bạn không hợp lệ hoặc chưa được kích hoạt. Lỗi chi tiết: {err_msg}"
             continue
             
-    return "[LỖI]: Đã thử tất cả các model miễn phí nhưng hệ thống OpenRouter đang quá tải toàn bộ!"
+    return f"[LỖI]: Đã thử tất cả model nhưng đều thất bại. Chi tiết lỗi:\n" + "\n".join(errors)
 
 # --- 4. MAIN INTERACTIVE CLI ---
 def main():
