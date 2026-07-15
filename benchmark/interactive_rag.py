@@ -19,8 +19,8 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.environ.get("OPENROUTER_API_KEY", "NOT_SET"),
 )
-# Chọn model nhỏ gọn miễn phí trên OpenRouter (hoặc đổi sang google/gemini-pro nếu cần)
-LLM_MODEL = "google/gemini-2.5-flash-free"
+# Chọn model miễn phí (hoặc đổi sang 'google/gemini-2.0-flash-exp:free' / 'meta-llama/llama-3.3-70b-instruct:free' nếu cần)
+LLM_MODEL = "google/gemini-2.0-flash-exp:free"
 
 # --- 1. NAIVE CHUNKER ---
 def naive_chunking(text: str, max_tokens: int = MAX_TOKENS) -> list[str]:
