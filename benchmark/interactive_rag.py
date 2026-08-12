@@ -3,7 +3,7 @@ import os
 import json
 import numpy as np
 from dotenv import load_dotenv
-from openai import OpenAI
+from google import genai
 from sentence_transformers import SentenceTransformer
 
 # Thêm src vào PYTHONPATH để import woodpecker
@@ -11,29 +11,19 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from woodpecker.core.cleaner import clean_text
 from woodpecker.config import MAX_TOKENS, VN_TOKEN_MULTIPLIER
 
-# Tải biến môi trường (OPENROUTER_API_KEY)
+# Tải biến môi trường (GEMINI_API_KEY)
 load_dotenv()
 
-# Khởi tạo OpenAI client trỏ tới OpenRouter
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY", "NOT_SET"),
-)
-import urllib.request
+# Khởi tạo client Gemini
+api_key = os.environ.get("GEMINI_API_KEY")
+client = None
+if api_key:
+    client = genai.Client(api_key=api_key)
+else:
+    print("[Cảnh báo]: Chưa cấu hình GEMINI_API_KEY")
 
-def get_free_models():
-    """Lấy danh sách TẤT CẢ các model đang được miễn phí ngay lúc này trên OpenRouter."""
-    try:
-        req = urllib.request.Request('https://openrouter.ai/api/v1/models')
-        with urllib.request.urlopen(req, timeout=5) as response:
-            models = json.loads(response.read().decode())['data']
-            # Lọc các model có chữ ":free" ở đuôi
-            return [m['id'] for m in models if m['id'].endswith(':free')]
-    except Exception as e:
-        print(f"[Cảnh báo]: Không thể tự động lấy danh sách model, dùng danh sách tĩnh.")
-        return ["meta-llama/llama-3.3-70b-instruct:free", "meta-llama/llama-3.2-3b-instruct:free", "nousresearch/hermes-3-llama-3.1-405b:free"]
+GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.6-pro"]
 
-FREE_MODELS = get_free_models()
 
 # --- 1. NAIVE CHUNKER ---
 def naive_chunking(text: str, max_tokens: int = MAX_TOKENS) -> list[str]:
@@ -77,21 +67,22 @@ Chỉ thị:
 Trả lời:"""
 
     errors = []
-    for model_id in FREE_MODELS:
+    if not client:
+        return "[LỖI]: Chưa khởi tạo Client do thiếu GEMINI_API_KEY"
+
+    for model_id in GEMINI_MODELS:
         try:
-            response = client.chat.completions.create(
+            interaction = client.interactions.create(
                 model=model_id,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.0
+                input=prompt
             )
-            ans = response.choices[0].message.content.strip()
+            ans = interaction.output_text.strip()
             return f"\n(Nguồn: {model_id})\n{ans}"
         except Exception as e:
             err_msg = str(e)
             errors.append(f"{model_id}: {err_msg}")
-            # Nếu lỗi là do Authentication (401), dừng lập tức vì các model khác cũng sẽ lỗi
-            if "401" in err_msg or "403" in err_msg:
-                return f"[LỖI XÁC THỰC API KEY]: Khóa API của bạn không hợp lệ hoặc chưa được kích hoạt. Lỗi chi tiết: {err_msg}"
+            if "401" in err_msg or "403" in err_msg or "API_KEY_INVALID" in err_msg:
+                return f"[LỖI XÁC THỰC API KEY]: Khóa API Gemini của bạn không hợp lệ hoặc chưa được kích hoạt. Lỗi chi tiết: {err_msg}"
             continue
             
     return f"[LỖI]: Đã thử tất cả model nhưng đều thất bại. Chi tiết lỗi:\n" + "\n".join(errors)
@@ -102,10 +93,10 @@ def main():
     print(" WOODPECKER INTERACTIVE RAG BENCHMARK CLI ".center(60, " "))
     print("="*60)
     
-    if os.environ.get("OPENROUTER_API_KEY") in (None, "NOT_SET", "your_api_key_here", ""):
-        print("\n[LỖI]: Chưa cấu hình OPENROUTER_API_KEY!")
-        print("1. Lấy API key miễn phí tại: https://openrouter.ai/settings/keys")
-        print("2. Copy file .env.example thành .env và điền key vào.")
+    if not os.environ.get("GEMINI_API_KEY"):
+        print("\n[LỖI]: Chưa cấu hình GEMINI_API_KEY!")
+        print("1. Lấy API key miễn phí tại: https://aistudio.google.com/app/apikey")
+        print("2. Thêm GEMINI_API_KEY=your_api_key vào file .env")
         return
 
     print("\n[1/3] Đang tải mô hình Embedding (BAAI/bge-m3)...")
@@ -131,7 +122,7 @@ def main():
     
     while True:
         try:
-            query = input("\n[HỘI ĐỒNG] Nhập câu hỏi truy vấn: ").strip()
+            query = input("\n[WoodpeckerRAG_Benchmark] Nhập câu hỏi truy vấn: ").strip()
             if not query: continue
             if query.lower() in ('quit', 'exit'): break
             
